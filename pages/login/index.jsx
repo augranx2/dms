@@ -11,7 +11,10 @@ export default function LoginPage() {
   const router = useRouter();
 
   // ?sebab=idle dikirim oleh pengalih otomatis saat sesi hangus karena diam.
-  const sesiHabis = router.query.sebab === "idle";
+  //   idle  = dihentikan pewaktu di peramban setelah 30 menit diam
+  //   habis = ditolak server karena sesi sudah tidak berlaku (termasuk batas 12 jam)
+  const sebab = router.query.sebab;
+  const sesiHabis = sebab === "idle" || sebab === "habis";
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -147,8 +150,9 @@ export default function LoginPage() {
 
               {sesiHabis && !error && (
                 <p className="lg-note">
-                  Sesi Anda berakhir karena tidak ada aktivitas selama 30 menit. Silakan masuk
-                  kembali.
+                  {sebab === "idle"
+                    ? "Sesi Anda berakhir karena tidak ada aktivitas selama 30 menit. Silakan masuk kembali."
+                    : "Sesi Anda sudah tidak berlaku — karena diam terlalu lama, atau karena telah melewati batas 12 jam sejak masuk. Silakan masuk kembali."}
                 </p>
               )}
 

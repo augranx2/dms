@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import DownloadButton from "../../components/DownloadButton";
 import useIdleLogout from "../../lib/useIdleLogout";
+import { tanganiSesiHabis } from "../../lib/sesiHabis";
 
 export default function ViewerPage() {
   const router = useRouter();
@@ -52,6 +53,8 @@ export default function ViewerPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ documentId }),
       });
+      if (tanganiSesiHabis(tokenRes, router)) return;
+
       const tokenData = await tokenRes.json();
       // The same call tells us whether this user may download THIS document
       // (Admin always, a Viewer only if the Admin ticked the download box).

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import DownloadButton from "../../components/DownloadButton";
+import { tanganiSesiHabis } from "../../lib/sesiHabis";
 import AppShell from "../../components/AppShell";
 
 export default function AdminDashboard() {
@@ -60,6 +61,8 @@ export default function AdminDashboard() {
         fetch("/api/admin/documents"),
         fetch("/api/admin/users"),
       ]);
+      if (tanganiSesiHabis(docsRes, router) || tanganiSesiHabis(usersRes, router)) return;
+
       const docsData = await docsRes.json();
       const usersData = await usersRes.json();
       if (!docsRes.ok) throw new Error(docsData.error || "Gagal memuat dokumen");
@@ -204,6 +207,7 @@ export default function AdminDashboard() {
   // melewati batas waktu) alih-alih JSON. res.json() pada kasus itu melempar
   // "Unexpected token '<'" yang tidak memberi tahu apa pun kepada pengguna.
   async function bacaRespons(res) {
+    if (tanganiSesiHabis(res, router)) return { error: "Sesi berakhir" };
     const teks = await res.text();
     try {
       return JSON.parse(teks);

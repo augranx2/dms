@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import DownloadButton from "../../components/DownloadButton";
 import AppShell from "../../components/AppShell";
+import { tanganiSesiHabis } from "../../lib/sesiHabis";
 
 export default function DocumentListPage() {
   const [docs, setDocs] = useState([]);
@@ -36,8 +37,7 @@ export default function DocumentListPage() {
   useEffect(() => {
     fetch("/api/documents/list")
       .then(async (res) => {
-        if (res.status === 401) {
-          router.push("/login");
+        if (tanganiSesiHabis(res, router)) {
           return;
         }
         const data = await res.json();

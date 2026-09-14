@@ -2,6 +2,7 @@ import Head from "next/head";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import AppShell from "../../components/AppShell";
+import { tanganiSesiHabis } from "../../lib/sesiHabis";
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -29,10 +30,7 @@ export default function UsersPage() {
     setError("");
     try {
       const res = await fetch("/api/admin/manage-users");
-      if (res.status === 401 || res.status === 403) {
-        router.push("/login");
-        return;
-      }
+      if (tanganiSesiHabis(res, router)) return;
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal memuat daftar pengguna");
       setUsers(data.users || []);
