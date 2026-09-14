@@ -150,6 +150,14 @@ export default function DocumentListPage() {
     return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
   }
 
+  // Catatan audit hanya menyimpan documentId. Judulnya dicarikan dari daftar
+  // dokumen yang sudah dimuat, sehingga catatan lama — yang ditulis sebelum
+  // judul ikut disimpan — tetap terbaca sebagai nama dokumen.
+  const judulDokumen = {};
+  docs.forEach((d) => {
+    judulDokumen[d.documentId] = d.namaDokumen;
+  });
+
   const nav = isAdmin ? [{ label: "Audit Trail", onClick: fetchAuditLogs, icon: "🕘" }] : [];
 
   return (
@@ -296,8 +304,13 @@ export default function DocumentListPage() {
                           <span className="pill">{log.action}</span>
                           <span style={{ fontSize: 12.5, fontWeight: 700 }}>{log.userEmail}</span>
                         </div>
+                        {log.documentId && (
+                          <p style={{ marginTop: 4, fontSize: 12.5, color: "var(--ink-2)", wordBreak: "break-word" }}>
+                            📄 {judulDokumen[log.documentId] || `Dokumen ${log.documentId}`}
+                          </p>
+                        )}
                         {log.detail && (
-                          <p className="hint" style={{ marginTop: 4 }}>{log.detail}</p>
+                          <p className="hint" style={{ marginTop: 3 }}>{log.detail}</p>
                         )}
                       </div>
                       <span className="hint" style={{ flexShrink: 0 }}>

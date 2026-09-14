@@ -2,7 +2,10 @@ import { requireSession } from "../../../lib/auth";
 import { getAllRows, logAudit } from "../../../lib/sheets";
 import { withErrorHandling } from "../../../lib/apiHandler";
 
-const AUDIT_COLUMNS = ["timestamp", "userEmail", "documentId", "action", "detail"];
+// Kolom judul disisipkan tepat setelah documentId. Judul tidak disimpan pada
+// tab Audit_Log — ia dicarikan saat ekspor, sehingga catatan lama pun ikut
+// terbaca dan tidak ada data yang digandakan di dua tempat.
+const CSV_COLUMNS = ["timestamp", "userEmail", "documentId", "namaDokumen", "action", "detail"];
 
 /**
  * Escapes one CSV field. Audit details are free text typed by admins and can
@@ -32,9 +35,23 @@ async function handler(req, res) {
     // shows — the point of downloading it is to have the full record for audit
     // or archiving purposes.
     if (req.query.format === "csv") {
+      let judul = {};
+      try {
+        const docs = await getAllRows("Documents");
+        docs.forEach((d) => {
+          judul[d.documentId] = d.namaDokumen || "";
+        });
+      } catch {
+        /* judul bersifat pelengkap — ekspor tetap berjalan tanpanya */
+      }
+
       const rows = [
-        AUDIT_COLUMNS.join(","),
-        ...logs.map((log) => AUDIT_COLUMNS.map((col) => csvField(log[col])).join(",")),
+        CSV_COLUMNS.join(","),
+        ...logs.map((log) =>
+          CSV_COLUMNS.map((col) =>
+            csvField(col === "namaDokumen" ? judul[log.documentId] || "" : log[col])
+          ).join(",")
+        ),
       ];
       // Leading BOM so Excel reads the file as UTF-8 and doesn't mangle
       // accented characters in document names.
