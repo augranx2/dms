@@ -16,11 +16,24 @@ export default function UploadPage() {
   const [error, setError] = useState("");
   const [doneSummary, setDoneSummary] = useState(null); // { success, failed }
   const [categories, setCategories] = useState([]);
+  const [seretAktif, setSeretAktif] = useState(false);
 
   const router = useRouter();
 
   // Daftar kategori diambil dari dokumen yang sudah ada, supaya admin memilih
   // ulang kategori lama alih-alih mengetiknya sedikit berbeda tiap kali.
+  useEffect(() => {
+    function cegah(e) {
+      e.preventDefault();
+    }
+    window.addEventListener("dragover", cegah);
+    window.addEventListener("drop", cegah);
+    return () => {
+      window.removeEventListener("dragover", cegah);
+      window.removeEventListener("drop", cegah);
+    };
+  }, []);
+
   useEffect(() => {
     fetch("/api/admin/categories")
       .then((r) => (r.ok ? r.json() : { categories: [] }))
@@ -34,6 +47,31 @@ export default function UploadPage() {
   }
 
   const totalBytes = files.reduce((sum, f) => sum + f.file.size, 0);
+
+  /**
+   * Menerima berkas yang diseret ke area unggah.
+   *
+   * dragover WAJIB dicegah perilaku bawaannya; tanpa itu peramban menganggap
+   * area ini bukan sasaran yang sah, dan berkas yang dilepas justru dibuka
+   * sebagai halaman baru — itulah sebabnya seret terasa tidak berfungsi.
+   */
+  function handleDragOver(e) {
+    if (uploading) return;
+    e.preventDefault();
+    setSeretAktif(true);
+  }
+
+  function handleDragLeave(e) {
+    e.preventDefault();
+    setSeretAktif(false);
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    setSeretAktif(false);
+    if (uploading) return;
+    handleFilesPicked(e.dataTransfer?.files);
+  }
 
   function handleFilesPicked(fileList) {
     setError("");
@@ -264,21 +302,29 @@ export default function UploadPage() {
             <label
               htmlFor="pdf-input"
               className="card"
+              onDragOver={handleDragOver}
+              onDragEnter={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
               style={{
                 display: "block",
                 padding: "30px 20px",
                 textAlign: "center",
                 borderStyle: "dashed",
-                borderColor: "var(--blue-100)",
-                background: "linear-gradient(180deg, #fbfdff, #f4f9ff)",
+                borderWidth: seretAktif ? 2 : 1,
+                borderColor: seretAktif ? "var(--blue-500)" : "var(--blue-100)",
+                background: seretAktif
+                  ? "var(--blue-50)"
+                  : "linear-gradient(180deg, #fbfdff, #f4f9ff)",
                 cursor: uploading ? "not-allowed" : "pointer",
+                transition: "border-color 0.12s, background 0.12s",
               }}
             >
               <div style={{ fontSize: 26, marginBottom: 8 }} aria-hidden="true">
                 📄
               </div>
               <div style={{ fontWeight: 800, fontSize: 14 }}>
-                Klik atau seret berkas PDF ke sini
+                {seretAktif ? "Lepaskan di sini" : "Klik atau seret berkas PDF ke sini"}
               </div>
               <p className="hint" style={{ marginTop: 4 }}>
                 Maksimal {formatMB(MAX_TOTAL_BYTES)} MB untuk seluruh berkas dalam satu kali unggah
