@@ -244,7 +244,7 @@ export default function ViewerPage() {
   return (
     <>
       <Head>
-        <title>Baca Dokumen — SIDOK</title>
+        <title>Baca Dokumen — DMS</title>
       </Head>
       <div className="reader">
       {/* Bilah menempel di atas layar: tombol kembali dan navigasi halaman

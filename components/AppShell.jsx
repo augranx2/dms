@@ -153,8 +153,8 @@ export default function AppShell({
             <img src="/logo-rama.png" alt="" />
           </div>
           <div className="grow truncate">
-            <div className="rail__name">SIDOK</div>
-            <div className="rail__tag truncate">Sistem Dokumen Terkendali</div>
+            <div className="rail__name">DMS</div>
+            <div className="rail__tag truncate">Document Management System</div>
           </div>
         </div>
 
@@ -173,7 +173,7 @@ export default function AppShell({
             <p className="mode__note">
               {mode === "admin"
                 ? "Anda mengelola dokumen: mengunggah, mengatur akses, dan menghapus."
-                : "Anda melihat SIDOK seperti yang dilihat personel biasa."}
+                : "Anda melihat DMS seperti yang dilihat personel biasa."}
             </p>
           </>
         )}
@@ -323,8 +323,8 @@ export default function AppShell({
           </button>
 
           <div className="appbar__brand">
-            <span className="appbar__brand-name">SIDOK</span>
-            <span className="appbar__brand-sub">Sistem Dokumen Terkendali</span>
+            <span className="appbar__brand-name">DMS</span>
+            <span className="appbar__brand-sub">Document Management System</span>
           </div>
 
           <div className="appbar__find">

@@ -42,7 +42,7 @@ export default function LoginPage() {
   return (
     <>
       <Head>
-        <title>Masuk — SIDOK</title>
+        <title>Masuk — DMS</title>
       </Head>
 
       <div className="lg-split">
@@ -57,7 +57,7 @@ export default function LoginPage() {
             </div>
             <div>
               <p className="lg-brand-name">PT. Rama Emerald Multi Sukses</p>
-              <p className="lg-brand-sub">SIDOK — Sistem Dokumen Terkendali</p>
+              <p className="lg-brand-sub">DMS — Document Management System</p>
             </div>
           </div>
 
@@ -99,13 +99,13 @@ export default function LoginPage() {
                 </div>
                 <div>
                   <p className="lg-brand-name">PT. Rama Emerald Multi Sukses</p>
-                  <p className="lg-brand-sub">SIDOK — Sistem Dokumen Terkendali</p>
+                  <p className="lg-brand-sub">DMS — Document Management System</p>
                 </div>
               </div>
               <p className="lg-hero-mobile__line">Dokumen mutu, terkendali sampai ke pengguna.</p>
             </div>
 
-            <h2>Masuk ke SIDOK</h2>
+            <h2>Masuk ke DMS</h2>
             <p className="lg-lead">
               Gunakan username dan password yang diberikan Administrator sistem.
             </p>

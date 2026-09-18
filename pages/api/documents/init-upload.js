@@ -10,13 +10,25 @@ import { withErrorHandling } from "../../../lib/apiHandler";
 
 const MAX_SIZE = Number(process.env.MAX_UPLOAD_SIZE_BYTES || 20 * 1024 * 1024);
 
+/**
+ * Menerima tanggal dalam format YYYY-MM-DD dan mengembalikannya apa adanya
+ * bila sah. Nilai kosong atau tidak sah dikembalikan sebagai string kosong,
+ * sehingga kolomnya tetap bersih alih-alih berisi "Invalid Date".
+ */
+function normalkanTanggal(nilai) {
+  const teks = String(nilai || "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(teks)) return "";
+  const d = new Date(`${teks}T00:00:00`);
+  return Number.isNaN(d.getTime()) ? "" : teks;
+}
+
 async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
   const session = await requireAdmin(req, res);
   if (!session) return; // requireAdmin already sent the response
 
-  const { fileName, mimeType, fileSize, kategori } = req.body;
+  const { fileName, mimeType, fileSize, kategori, tanggalBerlaku } = req.body;
 
   if (!fileName || !mimeType || !fileSize) {
     return res.status(400).json({ error: "fileName, mimeType, fileSize wajib diisi" });
@@ -59,6 +71,9 @@ async function handler(req, res) {
       documentId,
       namaDokumen: fileName,
       kategori: kategoriBersih,
+      // Opsional. Hanya diisi untuk dokumen yang memang baru disahkan; dokumen
+      // lama dibiarkan kosong.
+      tanggalBerlaku: normalkanTanggal(tanggalBerlaku),
       driveFileId: "",
       uploadedBy: session.email,
       uploadedAt: new Date().toISOString(),

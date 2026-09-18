@@ -120,7 +120,7 @@ export default function UsersPage() {
   return (
     <>
       <Head>
-        <title>Kelola Pengguna — SIDOK</title>
+        <title>Kelola Pengguna — DMS</title>
       </Head>
 
       <AppShell

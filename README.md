@@ -1,4 +1,4 @@
-# SIDOK — Sistem Dokumen Terkendali
+# DMS — Document Management System
 
 Web app internal PT. Rama Emerald Multi Sukses untuk upload PDF resmi kantor ke
 Google Drive dan membagikannya ke user tertentu yang harus login. Secara default
@@ -6,7 +6,7 @@ user hanya bisa **melihat** dokumen; izin **download** diberikan Admin per
 dokumen per user — lihat "Role & izin download" dan catatan penting di bagian
 "Batasan" di bawah.
 
-Nama pendek aplikasi: **SIDOK**. Nama lengkap: **Sistem Dokumen Terkendali**.
+Nama pendek aplikasi: **DMS**. Nama lengkap: **Document Management System**.
 
 ## Setup
 
@@ -45,15 +45,15 @@ lewat HTTPS ke action `login`, dan Apps Script yang membalas cocok/tidak.
 - Kolom `PasswordHash` dan `Salt` JANGAN diisi/diedit manual.
 
 **Documents**
-`documentId | namaDokumen | kategori | driveFileId | uploadedBy | uploadedAt | status`
-- `status`: `pending` (baru dibuat, belum selesai upload) atau `active`
-
-**Notifications**
-`notifId | userEmail | createdAt | type | title | detail | readAt`
-- Pemberitahuan per pengguna: dokumen baru dibagikan, akses dicabut, izin unduh berubah
-- `readAt` kosong berarti belum dibaca
-- **Tab ini perlu dibuat manual.** Selama belum ada, aplikasi tetap berjalan penuh —
-  daftar notifikasi hanya tampil kosong.
+`documentId | namaDokumen | kategori | driveFileId | uploadedBy | uploadedAt | status | tanggalBerlaku`
+- `tanggalBerlaku` **opsional**, format `YYYY-MM-DD`. Dicatat hanya bila
+  diperlukan; dokumen lama boleh dibiarkan kosong. Dapat ditambahkan atau
+  dihapus belakangan lewat tombol Ubah pada dashboard.
+- Nilainya **disalin dari master ber-TTE**, bukan ditetapkan di DMS. Pengesahan
+  dokumen dilakukan pada aplikasi TTD QR; DMS hanya menampilkan tanggalnya
+  sebagai keterangan pada daftar dokumen, tidak mencetaknya ke atas berkas.
+- **Kolom ini perlu ditambahkan manual** pada tab `Documents` bagi pemasangan
+  lama, tepat setelah `status`.
 
 **Document_Access**
 `documentId | userEmail | grantedBy | grantedAt | canDownload`

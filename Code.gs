@@ -23,7 +23,12 @@
  *   Users            : Nama | Role | Username | Status | PasswordBaru | PasswordHash | Salt
  *                       (Role: Admin / Viewer — Status: Aktif / Nonaktif)
  *   Documents        : documentId | namaDokumen | kategori | driveFileId |
- *                       uploadedBy | uploadedAt | status
+ *                       uploadedBy | uploadedAt | status | tanggalBerlaku
+ *                       (kolom "tanggalBerlaku" bersifat opsional, format
+ *                       YYYY-MM-DD. Nilainya DISALIN dari master ber-TTE, bukan
+ *                       ditetapkan di sini — pengesahan dokumen dilakukan pada
+ *                       aplikasi TTD QR. Kosong berarti tanggalnya tidak
+ *                       dicatat, misalnya pada dokumen lama.)
  *   Document_Access  : documentId | userEmail | grantedBy | grantedAt | canDownload
  *                       (kolom "userEmail" diisi Username, bukan email asli,
  *                       supaya konsisten dengan login berbasis Username.
@@ -46,7 +51,7 @@ const USERS_SHEET = "Users";
 const GENERIC_SCHEMAS = {
   Documents: [
     "documentId", "namaDokumen", "kategori", "driveFileId",
-    "uploadedBy", "uploadedAt", "status",
+    "uploadedBy", "uploadedAt", "status", "tanggalBerlaku",
   ],
   Document_Access: ["documentId", "userEmail", "grantedBy", "grantedAt", "canDownload"],
   Audit_Log: ["timestamp", "userEmail", "documentId", "action", "detail"],

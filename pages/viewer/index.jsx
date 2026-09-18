@@ -163,7 +163,7 @@ export default function DocumentListPage() {
   return (
     <>
       <Head>
-        <title>Dokumen Saya — SIDOK</title>
+        <title>Dokumen Saya — DMS</title>
       </Head>
 
       <AppShell
@@ -237,6 +237,14 @@ export default function DocumentListPage() {
                     <div className="doc__meta">
                       {doc.kategori && <span className="tag">{doc.kategori}</span>}
                       <span>Diunggah {fmtTgl(doc.uploadedAt)}</span>
+                      {doc.tanggalBerlaku && (
+                        <>
+                          <i aria-hidden="true" />
+                          <span className="pill pill--ok">
+                            Berlaku sejak {fmtTgl(doc.tanggalBerlaku)}
+                          </span>
+                        </>
+                      )}
                       <i aria-hidden="true" />
                       <span>{doc.canDownload ? "Boleh diunduh" : "Hanya bisa dibaca"}</span>
                     </div>

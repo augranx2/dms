@@ -60,6 +60,8 @@ export default function UploadPage() {
         file: f,
         kategori: "",
         kategoriBaru: false,
+        adaTanggalBerlaku: false,
+        tanggalBerlaku: "",
         allowedUsers: "",
         allowDownload: false,
         status: "pending", // pending | uploading | done | error
@@ -130,6 +132,8 @@ export default function UploadPage() {
         mimeType: entry.file.type,
         fileSize: entry.file.size,
         kategori: entry.kategori,
+        // Hanya dikirim bila admin memang mencentang perlu pengesahan.
+        tanggalBerlaku: entry.adaTanggalBerlaku ? entry.tanggalBerlaku : "",
       }),
     });
     const initData = await initRes.json();
@@ -170,6 +174,14 @@ export default function UploadPage() {
     }
     // Kategori menentukan folder tujuan di Drive, jadi divalidasi di sini juga
     // supaya admin tidak menunggu upload berjalan hanya untuk ditolak server.
+    const tanpaTanggal = files.filter((f) => f.adaTanggalBerlaku && !f.tanggalBerlaku);
+    if (tanpaTanggal.length > 0) {
+      setError(
+        `Tanggal berlaku belum diisi untuk: ${tanpaTanggal.map((f) => f.file.name).join(", ")}`
+      );
+      return;
+    }
+
     const tanpaKategori = files.filter((f) => !f.kategori.trim());
     if (tanpaKategori.length > 0) {
       setError(
@@ -218,7 +230,7 @@ export default function UploadPage() {
   return (
     <>
       <Head>
-        <title>Unggah Dokumen — SIDOK</title>
+        <title>Unggah Dokumen — DMS</title>
       </Head>
 
       <div className="main" style={{ minHeight: "100vh" }}>
@@ -228,7 +240,7 @@ export default function UploadPage() {
           </Link>
           <div className="row" style={{ gap: 9, flexWrap: "nowrap", marginLeft: 4 }}>
             <img src="/logo-rama.png" alt="" style={{ width: 26, height: 26, objectFit: "contain" }} />
-            <span style={{ fontSize: 13, fontWeight: 800 }}>SIDOK</span>
+            <span style={{ fontSize: 13, fontWeight: 800 }}>DMS</span>
           </div>
           <div className="grow" />
           <button className="btn" onClick={handleLogout}>
@@ -370,6 +382,42 @@ export default function UploadPage() {
                       onChange={(e) => updateFile(entry.id, { allowedUsers: e.target.value })}
                     />
                   </div>
+                </div>
+
+                {/* Pilihan, bukan keharusan: dokumen lama boleh dilewati.
+                    Nilainya DISALIN dari master ber-TTE — pengesahan dokumen
+                    dilakukan pada aplikasi TTD QR, bukan di sini. */}
+                <div className="row" style={{ gap: 12, marginTop: 10, alignItems: "flex-start" }}>
+                  <label className="check" style={{ flex: "0 0 auto" }}>
+                    <input
+                      type="checkbox"
+                      checked={entry.adaTanggalBerlaku}
+                      disabled={uploading}
+                      onChange={(e) =>
+                        updateFile(entry.id, {
+                          adaTanggalBerlaku: e.target.checked,
+                          tanggalBerlaku: e.target.checked ? entry.tanggalBerlaku : "",
+                        })
+                      }
+                    />
+                    <span>
+                      Catat <strong>tanggal berlaku</strong> dokumen ini
+                    </span>
+                  </label>
+
+                  {entry.adaTanggalBerlaku && (
+                    <div style={{ flex: "0 0 auto" }}>
+                      <input
+                        className={`input${entry.tanggalBerlaku ? "" : " input--bad"}`}
+                        style={{ width: 190 }}
+                        type="date"
+                        value={entry.tanggalBerlaku}
+                        disabled={uploading}
+                        onChange={(e) => updateFile(entry.id, { tanggalBerlaku: e.target.value })}
+                        aria-label="Tanggal berlaku"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <label className="check" style={{ marginTop: 10 }}>

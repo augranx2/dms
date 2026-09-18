@@ -24,6 +24,7 @@ export default function AdminDashboard() {
   const [selectedCategory, setSelectedCategory] = useState(null); // null = semua kategori
   const [editingCategoryDoc, setEditingCategoryDoc] = useState(null); // documentId being edited
   const [categoryIsNew, setCategoryIsNew] = useState(false); // sedang mengetik kategori baru
+  const [sahDraft, setSahDraft] = useState(""); // draf tanggal berlaku saat menyunting
   const [catFilter, setCatFilter] = useState("");
   const [aksesCari, setAksesCari] = useState({}); // { [documentId]: kata kunci }
   const [driveOpen, setDriveOpen] = useState(false); // dialog rapikan berkas Drive
@@ -337,6 +338,7 @@ export default function AdminDashboard() {
     setEditingCategoryDoc(doc.documentId);
     setCategoryDraft(doc.kategori || "");
     setCategoryIsNew(false);
+    setSahDraft(doc.tanggalBerlaku || "");
   }
 
   // Daftar kategori untuk dropdown, dihitung dari dokumen yang sudah dimuat —
@@ -355,7 +357,11 @@ export default function AdminDashboard() {
       const res = await fetch("/api/admin/update-document", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ documentId, kategori: categoryDraft }),
+        body: JSON.stringify({
+          documentId,
+          kategori: categoryDraft,
+          tanggalBerlaku: sahDraft,
+        }),
       });
       const data = await bacaRespons(res);
       if (!res.ok) throw new Error(data.error || "Gagal menyimpan kategori");
@@ -498,7 +504,7 @@ export default function AdminDashboard() {
   return (
     <>
       <Head>
-        <title>Kelola Dokumen — SIDOK</title>
+        <title>Kelola Dokumen — DMS</title>
       </Head>
 
       <AppShell
@@ -755,6 +761,15 @@ export default function AdminDashboard() {
                                 placeholder="Nama kategori baru"
                               />
                             )}
+                            <input
+                              className="input"
+                              style={{ width: 168, padding: "4px 8px", fontSize: 11.5 }}
+                              type="date"
+                              value={sahDraft}
+                              onChange={(e) => setSahDraft(e.target.value)}
+                              title="Tanggal berlaku — kosongkan bila tidak dicatat"
+                              aria-label="Tanggal berlaku"
+                            />
                             <button
                               className="btn btn--primary btn--sm"
                               disabled={savingCategory}
@@ -787,6 +802,14 @@ export default function AdminDashboard() {
 
                         <i aria-hidden="true" />
                         <span>Diunggah {fmtTgl(doc.uploadedAt)}</span>
+                        {doc.tanggalBerlaku && (
+                          <>
+                            <i aria-hidden="true" />
+                            <span className="pill pill--ok">
+                              Berlaku sejak {fmtTgl(doc.tanggalBerlaku)}
+                            </span>
+                          </>
+                        )}
                         <i aria-hidden="true" />
                         <span>{doc.sharedTo.length} pembaca</span>
                         {downloadCount > 0 && (
