@@ -200,7 +200,7 @@ function createUser_(body) {
   const password = String(body.password || "");
 
   if (!nama || !username || !password) throw new Error("Nama, username, dan password wajib diisi");
-  if (["Admin", "Viewer"].indexOf(role) === -1) throw new Error("Role harus Admin atau Viewer");
+  if (["Admin", "Viewer", "Tamu"].indexOf(role) === -1) throw new Error("Role harus Admin, Viewer, atau Tamu");
   if (password.length < 6) throw new Error("Password minimal 6 karakter");
   if (findUserByUsername_(username)) throw new Error("Username sudah dipakai");
 
@@ -226,7 +226,7 @@ function updateUser_(body) {
   }
   if (body.role !== undefined) {
     const role = String(body.role).trim();
-    if (["Admin", "Viewer"].indexOf(role) === -1) throw new Error("Role harus Admin atau Viewer");
+    if (["Admin", "Viewer", "Tamu"].indexOf(role) === -1) throw new Error("Role harus Admin, Viewer, atau Tamu");
     sheet.getRange(rowIndex, 2).setValue(role);
   }
   if (body.status !== undefined) {
@@ -330,7 +330,10 @@ function login_(username, password) {
     writeAuditLog_(username, "LOGIN_FAILED", "Password salah");
     return { error: "Username atau password salah." };
   }
-  const VALID_ROLES = ["Admin", "Viewer"];
+  // Tamu = akun pihak luar (auditor, pelanggan). Kewenangannya sama dengan
+  // Viewer; pembedanya hanya pengecualian dari pembagian massal, yang
+  // ditegakkan di sisi aplikasi.
+  const VALID_ROLES = ["Admin", "Viewer", "Tamu"];
   if (VALID_ROLES.indexOf(user.role) === -1) {
     writeAuditLog_(username, "LOGIN_FAILED", "Role tidak valid");
     return { error: "Role akun ini belum diatur dengan benar. Hubungi Administrator." };

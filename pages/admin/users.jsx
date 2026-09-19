@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import AppShell from "../../components/AppShell";
 import { tanganiSesiHabis } from "../../lib/sesiHabis";
+import { labelPeran, eksternal } from "../../lib/peran";
 
 export default function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -116,6 +117,7 @@ export default function UsersPage() {
 
   const jumlahAdmin = users.filter((u) => u.role === "Admin").length;
   const jumlahAktif = users.filter((u) => u.status === "Aktif").length;
+  const jumlahTamu = users.filter((u) => eksternal(u.role)).length;
 
   return (
     <>
@@ -146,8 +148,9 @@ export default function UsersPage() {
           <div>
             <h1>Kelola pengguna</h1>
             <p>
-              {users.length} akun terdaftar — {jumlahAktif} aktif, {jumlahAdmin} di antaranya
-              Administrator.
+              {users.length} akun terdaftar — {jumlahAktif} aktif, {jumlahAdmin} Administrator,
+              {" "}
+              {jumlahTamu} Tamu/Auditor.
             </p>
           </div>
           <div className="pagehead__acts">
@@ -212,9 +215,15 @@ export default function UsersPage() {
                   value={form.role}
                   onChange={(e) => setForm({ ...form, role: e.target.value })}
                 >
-                  <option value="Viewer">Pengguna — membaca dokumen yang dibagikan</option>
+                  <option value="Viewer">Pengguna — personel internal</option>
+                  <option value="Tamu">Tamu / Auditor — pihak luar</option>
                   <option value="Admin">Administrator — mengelola dokumen dan akun</option>
                 </select>
+                <p className="hint" style={{ marginTop: 5 }}>
+                  {form.role === "Tamu"
+                    ? "Akun Tamu tidak pernah ikut pada pembagian massal. Setiap dokumen harus dipilihkan Administrator satu per satu."
+                    : "Pengguna internal dapat ikut pada pembagian massal ke seluruh personel."}
+                </p>
               </div>
               <div style={{ width: 170 }}>
                 <label className="label" htmlFor="u-status">Status</label>
@@ -315,7 +324,9 @@ export default function UsersPage() {
                         <div className="doc__meta">
                           <span className="tag">{u.username}</span>
                           <i aria-hidden="true" />
-                          <span>{u.role === "Admin" ? "Administrator" : "Pengguna"}</span>
+                          <span className={eksternal(u.role) ? "pill" : undefined}>
+                            {labelPeran(u.role)}
+                          </span>
                           <i aria-hidden="true" />
                           <span className={u.status === "Aktif" ? "pill pill--ok" : "pill"}>
                             {u.status || "—"}
@@ -346,6 +357,7 @@ export default function UsersPage() {
                           }
                         >
                           <option value="Viewer">Pengguna</option>
+                          <option value="Tamu">Tamu / Auditor</option>
                           <option value="Admin">Administrator</option>
                         </select>
 

@@ -1,6 +1,7 @@
 import { requireAdmin } from "../../../lib/auth";
 import { findRows, appendRows, getUsersSafe, logAudit } from "../../../lib/sheets";
 import { notifyDocument } from "../../../lib/notifyDoc";
+import { eksternal } from "../../../lib/peran";
 import { withErrorHandling } from "../../../lib/apiHandler";
 
 async function handler(req, res) {
@@ -18,8 +19,11 @@ async function handler(req, res) {
   ]);
 
   const alreadyShared = new Set(existingAccess.map((a) => a.userEmail));
+  // Akun Tamu/Auditor dikecualikan di sisi server, bukan hanya disembunyikan
+  // di antarmuka — supaya pengecualiannya tetap berlaku sekalipun permintaan
+  // dikirim langsung ke endpoint ini.
   const targets = allUsers.filter(
-    (u) => u.status === "Aktif" && !alreadyShared.has(u.username)
+    (u) => u.status === "Aktif" && !eksternal(u.role) && !alreadyShared.has(u.username)
   );
 
   if (targets.length === 0) {
@@ -51,7 +55,7 @@ async function handler(req, res) {
     userEmail: session.email,
     documentId,
     action: "ACCESS_GRANTED",
-    detail: `to all (${added} user)${canDownload ? " (izin download)" : ""}`,
+    detail: `to all internal (${added} user)${canDownload ? " (izin download)" : ""}`,
   });
 
   return res.status(200).json({ success: true, added });

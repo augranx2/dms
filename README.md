@@ -36,7 +36,13 @@ lewat HTTPS ke action `login`, dan Apps Script yang membalas cocok/tidak.
 
 **Users**
 `Nama | Role | Username | Status | PasswordBaru | PasswordHash | Salt`
-- `Role`: `Admin` atau `Viewer` (hanya dua role ini — role `Downloader` sudah dihapus)
+- `Role`: `Admin`, `Viewer`, atau `Tamu`
+  - `Viewer` — personel internal; ikut pada pembagian massal
+  - `Tamu` — pihak luar (auditor BPOM/BBPOM, pelanggan). Kewenangannya sama
+    dengan Viewer, tetapi **tidak pernah ikut pada "Bagikan ke semua"** maupun
+    "Pilih semua internal". Setiap dokumen harus dipilihkan satu per satu.
+    Pengecualian ini ditegakkan di sisi server, bukan hanya disembunyikan di
+    antarmuka.
 - `Status`: `Aktif` atau `Nonaktif`
 - Cara tambah user baru: isi `Nama`, `Role`, `Username`, `Status` = `Aktif`,
   lalu ketik password polos di `PasswordBaru`. Begitu ada yang login (siapa saja),

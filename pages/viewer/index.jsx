@@ -5,6 +5,7 @@ import Link from "next/link";
 import DownloadButton from "../../components/DownloadButton";
 import AppShell from "../../components/AppShell";
 import { tanganiSesiHabis } from "../../lib/sesiHabis";
+import { eksternal } from "../../lib/peran";
 
 export default function DocumentListPage() {
   const [docs, setDocs] = useState([]);
@@ -187,6 +188,8 @@ export default function DocumentListPage() {
             <p>
               {isAdmin
                 ? "Sebagai Administrator Anda dapat membuka dan mengunduh seluruh dokumen aktif."
+                : eksternal(user.role)
+                ? "Dokumen yang secara khusus dibagikan kepada Anda oleh Administrator."
                 : "Dokumen yang dibagikan kepada Anda. Sebagian dapat diunduh bila Administrator memberi izin."}
             </p>
           </div>

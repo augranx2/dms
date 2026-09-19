@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import useIdleLogout from "../lib/useIdleLogout";
+import { labelPeran } from "../lib/peran";
 
 /**
  * Kerangka layar yang dipakai halaman daftar dokumen (admin maupun pengguna).
@@ -353,7 +354,7 @@ export default function AppShell({
               </span>
               <span className="who__id">
                 <span className="who__name">{user?.nama || user?.email || "—"}</span>
-                <span className="who__role">{user?.role === "Admin" ? "Administrator" : "Pengguna"}</span>
+                <span className="who__role">{labelPeran(user?.role)}</span>
               </span>
             </button>
 
@@ -372,7 +373,7 @@ export default function AppShell({
                     <div className="grow truncate">
                       <div style={{ fontWeight: 800, fontSize: 13 }}>{user?.nama || "—"}</div>
                       <div className="hint truncate">{user?.email}</div>
-                      <div className="hint">Peran: {user?.role}</div>
+                      <div className="hint">Peran: {labelPeran(user?.role)}</div>
                     </div>
                   </div>
 

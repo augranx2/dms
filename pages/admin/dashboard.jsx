@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import DownloadButton from "../../components/DownloadButton";
 import { tanganiSesiHabis } from "../../lib/sesiHabis";
+import { eksternal, hanyaInternal, labelPeran } from "../../lib/peran";
 import AppShell from "../../components/AppShell";
 
 export default function AdminDashboard() {
@@ -131,7 +132,9 @@ export default function AdminDashboard() {
     const withDownload = !!grantWithDownload[documentId];
     if (
       !confirm(
-        `Bagikan dokumen ini ke SEMUA user aktif${withDownload ? " DENGAN izin download" : " (lihat saja)"}?`
+        `Bagikan dokumen ini ke SEMUA pengguna internal yang aktif${
+          withDownload ? " DENGAN izin download" : " (baca saja)"
+        }?\n\nAkun Tamu/Auditor TIDAK ikut dibagikan — pilih satu per satu bila memang dituju.`
       )
     )
       return;
@@ -598,9 +601,15 @@ export default function AdminDashboard() {
             <div className="row" style={{ marginBottom: 9 }}>
               <button
                 className="btn btn--sm"
-                onClick={() => setBulkShare((p) => ({ ...p, usernames: users.map((u) => u.username) }))}
+                onClick={() =>
+                  setBulkShare((p) => ({
+                    ...p,
+                    usernames: hanyaInternal(users).map((u) => u.username),
+                  }))
+                }
+                title="Akun Tamu/Auditor tidak ikut — pilih satu per satu bila memang dituju"
               >
-                Pilih semua pengguna
+                Pilih semua internal
               </button>
               <button className="btn btn--sm" onClick={() => setBulkShare((p) => ({ ...p, usernames: [] }))}>
                 Kosongkan
@@ -1000,13 +1009,26 @@ export default function AdminDashboard() {
                               {availableUsers.map((u) => {
                                 const on = (selectedUsers[doc.documentId] || []).includes(u.username);
                                 return (
-                                  <label key={u.username} className={`who-chip${on ? " who-chip--on" : ""}`}>
+                                  <label
+                                    key={u.username}
+                                    className={`who-chip${on ? " who-chip--on" : ""}`}
+                                    title={
+                                      eksternal(u.role)
+                                        ? "Akun Tamu/Auditor — pihak luar"
+                                        : labelPeran(u.role)
+                                    }
+                                  >
                                     <input
                                       type="checkbox"
                                       checked={on}
                                       onChange={() => toggleUserSelected(doc.documentId, u.username)}
                                     />
                                     {u.username}
+                                    {eksternal(u.role) && (
+                                      <span style={{ fontSize: 9.5, fontWeight: 800, opacity: 0.85 }}>
+                                        TAMU
+                                      </span>
+                                    )}
                                   </label>
                                 );
                               })}
@@ -1039,7 +1061,7 @@ export default function AdminDashboard() {
                                 disabled={isBusy}
                                 onClick={() => handleGrantAll(doc.documentId)}
                               >
-                                Bagikan ke semua
+                                Bagikan ke semua internal
                               </button>
                             </div>
                           </>
