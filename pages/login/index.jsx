@@ -2,7 +2,52 @@ import Head from "next/head";
 import { useState } from "react";
 import { useRouter } from "next/router";
 
-export default function LoginPage() {
+// Mode Portal REMS (SSO_AKTIF=true): halaman login DMS tidak dipakai lagi.
+// Pengguna diarahkan ke login portal, lalu otomatis kembali ke DMS.
+export async function getServerSideProps(ctx) {
+  const { ssoAktif, periksaSso, portalUrl } = await import("../../lib/portalSso");
+  if (!ssoAktif()) return { props: {} };
+  const h = await periksaSso(ctx.req, "dms");
+  const host = ctx.req.headers["x-forwarded-host"] || ctx.req.headers.host;
+  const asal = `https://${host}/`;
+  if (h.status === "ok") {
+    return { redirect: { destination: h.user.role === "Admin" ? "/admin/dashboard" : "/viewer", permanent: false } };
+  }
+  if (h.status === "ganti-password") {
+    return { redirect: { destination: `${portalUrl()}/ganti-password?next=${encodeURIComponent(asal)}`, permanent: false } };
+  }
+  if (h.status === "akses") return { props: { tanpaAkses: true, portal: portalUrl() } };
+  return { redirect: { destination: `${portalUrl()}/login?next=${encodeURIComponent(asal)}`, permanent: false } };
+}
+
+function TanpaAkses({ portal }) {
+  return (
+    <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24, background: "#f8fafc" }}>
+      <Head>
+        <title>Tidak ada akses — DMS</title>
+      </Head>
+      <div style={{ maxWidth: 420, background: "#fff", border: "1px solid #e2e8f0", borderRadius: 16, padding: 28, textAlign: "center" }}>
+        <h1 style={{ fontSize: 20, fontWeight: 700, color: "#0f172a", margin: 0 }}>Tidak ada akses</h1>
+        <p style={{ color: "#475569", marginTop: 10, lineHeight: 1.55 }}>
+          Akun Anda belum diberi akses ke DMS. Hubungi admin Portal REMS bila Anda memerlukannya.
+        </p>
+        <a
+          href={portal}
+          style={{ display: "inline-block", marginTop: 18, padding: "10px 20px", borderRadius: 999, background: "#1e4d8f", color: "#fff", fontWeight: 600, textDecoration: "none" }}
+        >
+          Kembali ke Portal REMS
+        </a>
+      </div>
+    </div>
+  );
+}
+
+export default function LoginPage(props) {
+  if (props && props.tanpaAkses) return <TanpaAkses portal={props.portal} />;
+  return <LoginForm />;
+}
+
+function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);

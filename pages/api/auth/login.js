@@ -3,6 +3,7 @@ import { generateToken, setSessionCookie } from "../../../lib/auth";
 import { SESSION_ABSOLUTE_SECONDS } from "../../../lib/redis";
 import { createSession, registerFailedLogin, clearFailedLogin, getFailedLoginCount } from "../../../lib/redis";
 import { withErrorHandling } from "../../../lib/apiHandler";
+import { ssoAktif, portalUrl } from "../../../lib/portalSso";
 
 
 
@@ -16,6 +17,9 @@ import { withErrorHandling } from "../../../lib/apiHandler";
  */
 async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
+  if (ssoAktif()) {
+    return res.status(400).json({ error: `Login sekarang lewat Portal REMS: ${portalUrl()}` });
+  }
 
   const { username, password } = req.body;
   if (!username || !password) {

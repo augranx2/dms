@@ -1,6 +1,7 @@
 import { requireSession } from "../../../lib/auth";
 import { changePasswordViaAppsScript } from "../../../lib/sheets";
 import { withErrorHandling } from "../../../lib/apiHandler";
+import { ssoAktif, portalUrl } from "../../../lib/portalSso";
 
 /**
  * Old password is verified inside Code.gs (same SHA-256+salt check used for
@@ -10,6 +11,9 @@ import { withErrorHandling } from "../../../lib/apiHandler";
  */
 async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
+  if (ssoAktif()) {
+    return res.status(400).json({ error: `Password sekarang diganti lewat Portal REMS: ${portalUrl()}/ganti-password` });
+  }
 
   const session = await requireSession(req, res);
   if (!session) return;
