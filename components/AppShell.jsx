@@ -1,3 +1,4 @@
+import { ssoAktif as portalSsoAktif } from "../lib/portalSso";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import useIdleLogout from "../lib/useIdleLogout";
@@ -382,16 +383,27 @@ export default function AppShell({
                   </p>
 
                   <div className="stack" style={{ gap: 7 }}>
-                    <button
-                      type="button"
-                      className="btn btn--primary btn--block"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        setPwOpen(true);
-                      }}
-                    >
-                      Ganti password
-                    </button>
+                    {portalSsoAktif() && (
+                      <a
+                        href="https://portal.myrama.id"
+                        className="btn btn--block"
+                        style={{ textDecoration: "none", textAlign: "center" }}
+                      >
+                        ⌂ Kembali ke Portal REMS
+                      </a>
+                    )}
+                    {!portalSsoAktif() && (
+                      <button
+                        type="button"
+                        className="btn btn--primary btn--block"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          setPwOpen(true);
+                        }}
+                      >
+                        Ganti password
+                      </button>
+                    )}
                     <button
                       type="button"
                       className="btn btn--block"
