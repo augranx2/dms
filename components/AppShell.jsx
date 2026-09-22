@@ -1,4 +1,3 @@
-import { ssoAktif as portalSsoAktif } from "../lib/portalSso";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import useIdleLogout from "../lib/useIdleLogout";
@@ -383,16 +382,16 @@ export default function AppShell({
                   </p>
 
                   <div className="stack" style={{ gap: 7 }}>
-                    {portalSsoAktif() && (
+                    {user?.sso && (
                       <a
-                        href="https://portal.myrama.id"
+                        href={user?.portalUrl || "https://portal.myrama.id"}
                         className="btn btn--block"
                         style={{ textDecoration: "none", textAlign: "center" }}
                       >
                         ⌂ Kembali ke Portal REMS
                       </a>
                     )}
-                    {!portalSsoAktif() && (
+                    {!user?.sso && (
                       <button
                         type="button"
                         className="btn btn--primary btn--block"
@@ -417,6 +416,16 @@ export default function AppShell({
             )}
           </div>
 
+          {user?.sso && (
+            <a
+              href={user?.portalUrl || "https://portal.myrama.id"}
+              className="btn btn--sm"
+              style={{ textDecoration: "none" }}
+              title="Kembali ke Portal REMS"
+            >
+              ⌂ Portal
+            </a>
+          )}
           <button type="button" className="btn btn--sm" onClick={onLogout} disabled={loggingOut}>
             {loggingOut ? "Keluar..." : "Keluar"}
           </button>

@@ -49,7 +49,7 @@ export default function DocumentListPage() {
 
     fetch("/api/auth/me")
       .then((res) => (res.ok ? res.json() : null))
-      .then((me) => setUser({ role: me?.role || null, nama: me?.nama || me?.email || "", username: me?.email || "" }))
+      .then((me) => setUser({ role: me?.role || null, nama: me?.nama || me?.email || "", username: me?.email || "", sso: !!me?.sso, portalUrl: me?.portalUrl || null }))
       .catch(() => {});
   }, [router]);
 
@@ -168,7 +168,7 @@ export default function DocumentListPage() {
       </Head>
 
       <AppShell
-        user={{ nama: user.nama, email: user.username, role: user.role }}
+        user={{ nama: user.nama, email: user.username, role: user.role, sso: user.sso, portalUrl: user.portalUrl }}
         mode="user"
         nav={nav}
         categories={categoryList}

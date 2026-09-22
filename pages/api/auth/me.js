@@ -1,5 +1,6 @@
 import { getCurrentSession } from "../../../lib/auth";
 import { withErrorHandling } from "../../../lib/apiHandler";
+import { portalUrl } from "../../../lib/portalSso";
 
 async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).end();
@@ -11,6 +12,9 @@ async function handler(req, res) {
     email: session.email,
     nama: session.nama,
     role: session.role,
+    // Dipakai tampilan untuk tombol "Kembali ke Portal REMS".
+    sso: !!session.sso,
+    portalUrl: session.sso ? portalUrl() : null,
   });
 }
 

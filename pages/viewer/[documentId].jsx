@@ -36,12 +36,25 @@ export default function ViewerPage() {
     async function loadAndRender() {
       // pdf.js is loaded dynamically because it relies on browser APIs
       // (no SSR) and needs its worker file set up.
-      const pdfjsLib = await import("pdfjs-dist/build/pdf.mjs");
+      // Browser lama (Chrome < 119, Safari < 17.4) belum punya
+      // Promise.withResolvers yang dipakai pdf.js v4. Tambal dulu, lalu pakai
+      // build "legacy" pdf.js yang memang disiapkan untuk browser lama.
+      if (typeof Promise.withResolvers !== "function") {
+        Promise.withResolvers = function () {
+          let resolve, reject;
+          const promise = new Promise((res, rej) => {
+            resolve = res;
+            reject = rej;
+          });
+          return { promise, resolve, reject };
+        };
+      }
+      const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf.mjs");
       // Use whatever version actually got installed (npm may resolve a
       // newer patch than what's pinned in package.json) so the worker file
       // always matches the API version exactly — a mismatch here is a hard
       // error in pdf.js.
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjsLib.version}/legacy/build/pdf.worker.min.mjs`;
 
       // 0. Get current user email for the watermark.
       const meRes = await fetch("/api/auth/me");
