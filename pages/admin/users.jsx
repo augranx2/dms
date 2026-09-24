@@ -46,7 +46,17 @@ export default function UsersPage() {
     muat();
     fetch("/api/auth/me")
       .then((res) => (res.ok ? res.json() : null))
-      .then((d) => d && setMe({ nama: d.nama || d.email, email: d.email, role: d.role }))
+      .then(
+        (d) =>
+          d &&
+          setMe({
+            nama: d.nama || d.email,
+            email: d.email,
+            role: d.role,
+            sso: !!d.sso,
+            portalUrl: d.portalUrl || null,
+          })
+      )
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -86,8 +96,15 @@ export default function UsersPage() {
 
   async function tambahPengguna(e) {
     e.preventDefault();
+    // Mode portal: password DMS tidak dipakai untuk masuk, tetapi Apps Script
+    // tetap memerlukannya. Diisi acak dan tidak pernah ditampilkan.
+    const password = me.sso
+      ? Array.from(crypto.getRandomValues(new Uint8Array(18)))
+          .map((b) => b.toString(36))
+          .join("")
+      : form.password;
     const ok = await kirim(
-      { aksi: "tambah", ...form, username: form.username.trim(), nama: form.nama.trim() },
+      { aksi: "tambah", ...form, password, username: form.username.trim(), nama: form.nama.trim() },
       `Akun ${form.username.trim()} berhasil dibuat.`
     );
     if (ok) {
@@ -148,6 +165,12 @@ export default function UsersPage() {
           <div>
             <h1>Kelola pengguna</h1>
             <p>
+              {me.sso && (
+                <>
+                  Login lewat Portal REMS. Status Nonaktif di sini tetap menutup akses DMS,
+                  sekalipun orangnya masih bisa masuk ke portal.{" "}
+                </>
+              )}
               {users.length} akun terdaftar — {jumlahAktif} aktif, {jumlahAdmin} Administrator,
               {" "}
               {jumlahTamu} Tamu/Auditor.
@@ -239,23 +262,33 @@ export default function UsersPage() {
               </div>
             </div>
 
-            <div>
-              <label className="label" htmlFor="u-pass">Password awal</label>
-              <input
-                id="u-pass"
-                className="input"
-                type="text"
-                value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                placeholder="Minimal 6 karakter"
-                minLength={6}
-                required
-              />
-              <p className="hint" style={{ marginTop: 5 }}>
-                Sampaikan password ini kepada yang bersangkutan dan minta segera menggantinya
-                lewat menu Ganti password.
+            {me.sso ? (
+              /* Saat login lewat Portal REMS, password DMS tidak pernah dipakai.
+                 Akun di sini hanya daftar penerima dokumen — akun login-nya
+                 dibuat terpisah di portal dengan username yang sama. */
+              <p className="notice notice--warn">
+                Login memakai Portal REMS. Pastikan akun dengan username yang sama juga dibuat
+                di portal dan diberi akses ke DMS — tanpa itu orang ini tidak dapat masuk.
               </p>
-            </div>
+            ) : (
+              <div>
+                <label className="label" htmlFor="u-pass">Password awal</label>
+                <input
+                  id="u-pass"
+                  className="input"
+                  type="text"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  placeholder="Minimal 6 karakter"
+                  minLength={6}
+                  required
+                />
+                <p className="hint" style={{ marginTop: 5 }}>
+                  Sampaikan password ini kepada yang bersangkutan dan minta segera menggantinya
+                  lewat menu Ganti password.
+                </p>
+              </div>
+            )}
 
             <button type="submit" className="btn btn--primary" disabled={sibuk === "tambah"}>
               {sibuk === "tambah" ? "Menyimpan..." : "Buat akun"}
@@ -378,13 +411,15 @@ export default function UsersPage() {
                           <option value="Nonaktif">Nonaktif</option>
                         </select>
 
-                        <button
-                          className="btn btn--sm"
-                          disabled={busy}
-                          onClick={() => setResetFor({ username: u.username, password: "" })}
-                        >
-                          Reset password
-                        </button>
+                        {!me.sso && (
+                          <button
+                            className="btn btn--sm"
+                            disabled={busy}
+                            onClick={() => setResetFor({ username: u.username, password: "" })}
+                          >
+                            Reset password
+                          </button>
+                        )}
 
                         <button
                           className="btn btn--danger btn--sm"

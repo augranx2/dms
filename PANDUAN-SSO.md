@@ -33,6 +33,19 @@ Ubah `SSO_AKTIF` menjadi `false`, lalu Redeploy.
   (Admin ke dashboard admin, Viewer ke daftar dokumen).
 - Role Admin/Viewer diambil dari portal. Hak dokumen per user tetap diatur
   di DMS seperti biasa, berdasarkan username yang sama.
+- **DMS tetap menjadi penjaga pintu kedua.** Setiap pengguna harus terdaftar
+  di tab `Users` DMS dengan status `Aktif`. Menonaktifkan akun di DMS langsung
+  menutup akses DMS (paling lambat 1 menit), sekalipun orangnya masih bisa
+  masuk ke portal dan aplikasi lain.
+- Akun yang di DMS berperan `Tamu` selalu diperlakukan sebagai Tamu, apa pun
+  peran yang dikirim portal — pihak luar tidak dapat memperoleh hak Admin
+  karena salah atur di sisi portal.
+- Tombol Reset password dan kolom Password awal disembunyikan di Kelola
+  pengguna; password dikelola sepenuhnya oleh portal.
 - Keluar (termasuk keluar otomatis setelah 30 menit diam di DMS) mengakhiri
   sesi portal, jadi berlaku untuk semua aplikasi.
+- **Batas diam 30 menit.** Samakan dengan portal: isi `SESSION_IDLE_MINUTES=30`
+  di Environment Variables project **portal**. Bila portal dibiarkan 60 menit,
+  DMS tetap mengeluarkan pengguna setelah 30 menit diam — dan karena keluar
+  bersifat global, sesi di aplikasi lain ikut berakhir.
 - Ganti password lewat portal.

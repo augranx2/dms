@@ -246,19 +246,93 @@ export default function ViewerPage() {
         e.preventDefault();
       }
     }
+    // Ctrl+P hanya satu dari beberapa jalan mencetak. Menu peramban, menu
+    // "Bagikan → Cetak" di ponsel, dan perintah cetak bawaan sistem tidak
+    // melewati penekanan tombol sama sekali. Semuanya memicu "beforeprint",
+    // jadi di sinilah percobaannya dicatat. Pengosongan halamannya sendiri
+    // dilakukan lewat CSS @media print di bawah.
+    let tercatat = false;
+    function catatCetak() {
+      if (tercatat || !documentId) return;
+      tercatat = true;
+      fetch("/api/documents/print-attempt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documentId }),
+        keepalive: true,
+      }).catch(() => {});
+      // Satu catatan per kunjungan cukup; tidak membanjiri audit trail.
+    }
+
     document.addEventListener("contextmenu", blockContextMenu);
     document.addEventListener("keydown", blockKeys);
+    window.addEventListener("beforeprint", catatCetak);
     return () => {
       document.removeEventListener("contextmenu", blockContextMenu);
       document.removeEventListener("keydown", blockKeys);
+      window.removeEventListener("beforeprint", catatCetak);
     };
-  }, []);
+  }, [documentId]);
 
   return (
     <>
       <Head>
         <title>Baca Dokumen — DMS</title>
       </Head>
+      {/* Yang tampil HANYA saat dicetak — menggantikan seluruh isi dokumen. */}
+      <div className="cetak-ditolak">
+        <h1>Dokumen ini tidak dapat dicetak</h1>
+        <p>
+          Dokumen terkendali pada DMS hanya dapat dibaca di layar. Bila Anda memerlukan salinan,
+          gunakan tombol Unduh — tersedia bila Administrator memberi izin — agar salinan membawa cap
+          terkendali dan tercatat dalam audit trail.
+        </p>
+        <p>Percobaan mencetak ini telah dicatat.</p>
+      </div>
+
+      <style jsx global>{`
+        .cetak-ditolak {
+          display: none;
+        }
+
+        /* Pencetakan melalui jalan apa pun — Ctrl+P, menu peramban, menu
+           Bagikan di ponsel, atau "Save as PDF" — memakai aturan media print.
+           Di sini seluruh isi dokumen disembunyikan dan diganti keterangan.
+           Tanpa ini, kanvas halaman ikut tercetak utuh dan menjadi salinan
+           tanpa cap terkendali. */
+        @media print {
+          body * {
+            visibility: hidden !important;
+          }
+          .reader,
+          .reader * {
+            display: none !important;
+          }
+          .cetak-ditolak,
+          .cetak-ditolak * {
+            visibility: visible !important;
+          }
+          .cetak-ditolak {
+            display: block !important;
+            position: fixed;
+            inset: 0;
+            padding: 60px 48px;
+            font-family: Arial, sans-serif;
+            color: #0f172a;
+            background: #fff;
+          }
+          .cetak-ditolak h1 {
+            font-size: 22px;
+            margin: 0 0 14px;
+          }
+          .cetak-ditolak p {
+            font-size: 13px;
+            line-height: 1.6;
+            margin: 0 0 10px;
+          }
+        }
+      `}</style>
+
       <div className="reader">
       {/* Bilah menempel di atas layar: tombol kembali dan navigasi halaman
           selalu terjangkau tanpa menggulir ke puncak dokumen. */}

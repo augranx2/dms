@@ -50,7 +50,14 @@ export default function AdminDashboard() {
     fetch("/api/auth/me")
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (data) setMe({ nama: data.nama || data.email, email: data.email, role: data.role });
+        if (data)
+          setMe({
+            nama: data.nama || data.email,
+            email: data.email,
+            role: data.role,
+            sso: !!data.sso,
+            portalUrl: data.portalUrl || null,
+          });
       })
       .catch(() => {});
   }, []);

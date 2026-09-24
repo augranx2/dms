@@ -213,17 +213,29 @@ export default function AppShell({
             </button>
           )}
 
-          <button
-            type="button"
-            className="rail__link"
-            onClick={() => {
-              setRailOpen(false);
-              setPwOpen(true);
-            }}
-          >
-            <span aria-hidden="true">🔑</span>
-            Ganti password
-          </button>
+          {/* Saat login lewat Portal REMS, password dikelola portal — menu ini
+              mengarah ke sana alih-alih membuka dialog yang pasti ditolak. */}
+          {user?.sso ? (
+            <a
+              href={`${user?.portalUrl || "https://portal.myrama.id"}/ganti-password`}
+              className="rail__link"
+            >
+              <span aria-hidden="true">🔑</span>
+              Ganti password di Portal
+            </a>
+          ) : (
+            <button
+              type="button"
+              className="rail__link"
+              onClick={() => {
+                setRailOpen(false);
+                setPwOpen(true);
+              }}
+            >
+              <span aria-hidden="true">🔑</span>
+              Ganti password
+            </button>
+          )}
         </div>
 
         {nav.length > 0 && (
